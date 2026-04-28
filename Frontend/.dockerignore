@@ -1,3 +1,9 @@
-dist/
-node_modules/
-*.log
+node_modules
+npm-debug.log
+dist
+build
+.git
+.gitignore
+README.md
+.env.example
+install.bat

@@ -1,7 +1,0 @@
-﻿services:
-  frontend:
-    build:
-      context: .
-    container_name: biblioteca_frontend_app
-    ports:
-      - "3000:80"

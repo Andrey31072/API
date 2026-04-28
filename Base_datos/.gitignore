@@ -1,6 +1,0 @@
-.idea/
-.vscode/
-*.log
-databasechangelog.csv
-postgres-data/
-.env

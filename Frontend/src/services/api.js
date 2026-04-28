@@ -1,63 +1,36 @@
-const storedApiUrl = localStorage.getItem('biblioteca_api_url');
+import axios from 'axios'
 
-// URL base del backend. El frontend siempre llama al backend desde aqui.
-// Prioridad:
-// 1. window.BIBLIOTECA_API_URL si se define en el navegador o despliegue.
-// 2. localStorage, util para cambiar la URL sin recompilar.
-// 3. localhost:8080/api, que es el backend local por defecto.
-export const API_BASE = window.BIBLIOTECA_API_URL || storedApiUrl || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
-// Funcion central para hacer peticiones HTTP al backend.
-// Todas las operaciones CRUD pasan por aqui para compartir headers, errores y lectura JSON.
-async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    ...options
-  });
-
-  // DELETE normalmente responde 204 No Content, es decir, sin cuerpo JSON.
-  if (response.status === 204) {
-    return null;
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
   }
+})
 
-  // Intenta leer la respuesta como JSON. Si viene vacia o no es JSON, deja data en null.
-  const data = await response.json().catch(() => null);
-
-  // Si el backend responde error, se lanza una excepcion para mostrarla en la pantalla.
-  if (!response.ok) {
-    throw new Error(data?.message || `Error HTTP ${response.status}`);
-  }
-
-  return data;
+export const usuariosAPI = {
+  getAll: () => api.get('/api/usuarios'),
+  getById: (id) => api.get(`/api/usuarios/${id}`),
+  create: (data) => api.post('/api/usuarios', data),
+  update: (id, data) => api.put(`/api/usuarios/${id}`, data),
+  delete: (id) => api.delete(`/api/usuarios/${id}`)
 }
 
-// Objeto con metodos reutilizables para CRUD.
-// resource es el nombre del endpoint: usuarios, libros o prestamos.
-export const bibliotecaApi = {
-  list(resource) {
-    return request(`/${resource}`);
-  },
-  get(resource, id) {
-    return request(`/${resource}/${id}`);
-  },
-  create(resource, payload) {
-    return request(`/${resource}`, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-  },
-  update(resource, id, payload) {
-    return request(`/${resource}/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(payload)
-    });
-  },
-  remove(resource, id) {
-    return request(`/${resource}/${id}`, {
-      method: 'DELETE'
-    });
-  }
-};
+export const tareasAPI = {
+  getAll: () => api.get('/api/tareas'),
+  getById: (id) => api.get(`/api/tareas/${id}`),
+  create: (data) => api.post('/api/tareas', data),
+  update: (id, data) => api.put(`/api/tareas/${id}`, data),
+  delete: (id) => api.delete(`/api/tareas/${id}`)
+}
+
+export const asignacionesAPI = {
+  getAll: () => api.get('/api/asignaciones'),
+  asignar: (data) => api.post('/api/asignaciones', data),
+  desasignar: (usuarioId, tareaId) => api.delete(`/api/asignaciones?usuarioId=${usuarioId}&tareaId=${tareaId}`),
+  getTareasDeUsuario: (usuarioId) => api.get(`/api/asignaciones/usuario/${usuarioId}`),
+  getUsuariosDeTarea: (tareaId) => api.get(`/api/asignaciones/tarea/${tareaId}`)
+}
+
+export default api
